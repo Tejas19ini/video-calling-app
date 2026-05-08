@@ -1,0 +1,82 @@
+<html>
+
+<head>
+    <style>
+        #root {
+            width: 100vw;
+            height: 100vh;
+            }
+    </style>
+</head>
+
+
+<body>
+    <div id="root"></div>
+</body>
+<script src="https://unpkg.com/@zegocloud/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
+<script>
+window.onload = async function () {
+
+    function getUrlParams(url) {
+        let urlStr = url.split('?')[1];
+        const urlSearchParams = new URLSearchParams(urlStr);
+        return Object.fromEntries(urlSearchParams.entries());
+    }
+
+    const roomID = getUrlParams(window.location.href)['roomID'] || (Math.floor(Math.random() * 10000) + "");
+    const userID = Math.floor(Math.random() * 10000) + "";
+    const userName = getUrlParams(window.location.href)['Username'] || "userName" + userID;
+
+    const appID = 1489640686;
+    const serverSecret = "2e0db1c10f9c79047277724b95bbdd1e";
+
+    const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
+        appID, serverSecret, roomID, userID, userName
+    );
+
+    // 🔥 IMPORTANT: Initialize camera FIRST
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+
+// 🔥 RELEASE CAMERA
+stream.getTracks().forEach(track => track.stop());
+
+    const zp = ZegoUIKitPrebuilt.create(kitToken);
+
+    // ✅ ONLY ONE joinRoom()
+    zp.joinRoom({
+        container: document.querySelector("#root"),
+
+        sharedLinks: [{
+            name: 'Personal link',
+            url: window.location.protocol + '//' + window.location.host +
+                 window.location.pathname + '?roomID=' + roomID,
+        }],
+
+        scenario: {
+            mode: ZegoUIKitPrebuilt.OneONoneCall,
+        },
+
+       
+           	turnOnMicrophoneWhenJoining: false,
+           	turnOnCameraWhenJoining: false,
+           	showMyCameraToggleButton: true,
+           	showMyMicrophoneToggleButton: true,
+           	showAudioVideoSettingsButton: true,
+           	showScreenSharingButton: true,
+           	showTextChat: true,
+           	showUserList: true,
+           	maxUsers: 50,
+           	layout: "Grid",
+           	showLayoutButton: true,
+           	scenario: {
+           		mode: "GroupCall",
+           		config: {
+           			role: "Host",
+         		},
+         	},
+         }
+    );
+}
+</script>
+
+</html>
